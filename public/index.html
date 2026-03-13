@@ -4,252 +4,246 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CineAI — AI Movie Intelligence</title>
-<meta name="description" content="AI-powered movie recommendations with real posters and trailers"/>
+<meta name="description" content="AI-powered movie recommendations. Real posters, real ratings, real AI."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#060608;--s1:#0c0c14;--s2:#111120;--s3:#16162a;
-  --b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.1);--b3:rgba(255,255,255,.16);
-  --accent:#e63946;--gold:#f4a261;--teal:#2ec4b6;--violet:#7c6aff;
+  --b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.1);--b3:rgba(255,255,255,.18);
+  --accent:#e63946;--gold:#f4a261;--teal:#2ec4b6;--violet:#7c6aff;--green:#2dc653;
   --text:#f0ecfa;--sub:#9494b4;--dim:#5a5a78;
-  --r:rgba(230,57,70,.3);--g:rgba(46,196,182,.25);
-  --img:https://image.tmdb.org/t/p/;
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden;cursor:none;min-height:100vh}
 
 /* Cursor */
-#cur{position:fixed;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s,height .25s,opacity .25s;mix-blend-mode:screen}
-#cur2{position:fixed;width:32px;height:32px;border:1px solid rgba(230,57,70,.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .1s,top .1s,width .3s,height .3s}
+#cur{position:fixed;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s,height .25s;mix-blend-mode:screen}
+#cur2{position:fixed;width:32px;height:32px;border:1px solid rgba(230,57,70,.45);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .1s,top .1s,width .3s,height .3s}
 
-/* Nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;background:linear-gradient(to bottom,rgba(6,6,8,.95),transparent);transition:background .3s}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;background:linear-gradient(to bottom,rgba(6,6,8,.96),transparent);transition:background .3s}
 nav.solid{background:rgba(6,6,8,.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1)}
-.logo{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:4px;background:linear-gradient(120deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0}
-.nav-mid{display:flex;gap:1.8rem;list-style:none}
-.nav-mid a{color:var(--sub);text-decoration:none;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:2px;text-transform:uppercase;transition:color .3s;cursor:none}
-.nav-mid a:hover,.nav-mid a.active{color:var(--text)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:4px;background:linear-gradient(120deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-tabs{display:flex;gap:0;list-style:none}
+.nav-tabs button{background:none;border:none;color:var(--sub);font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;padding:.4rem 1rem;cursor:none;transition:color .3s;position:relative}
+.nav-tabs button::after{content:'';position:absolute;bottom:-2px;left:1rem;right:1rem;height:1px;background:var(--accent);transform:scaleX(0);transition:transform .3s}
+.nav-tabs button:hover,.nav-tabs button.active{color:var(--text)}
+.nav-tabs button.active::after{transform:scaleX(1)}
 .nav-right{display:flex;align-items:center;gap:1rem}
-.nav-search{display:flex;align-items:center;background:rgba(255,255,255,.05);border:1px solid var(--b2);border-radius:3px;overflow:hidden;transition:all .3s}
-.nav-search:focus-within{border-color:var(--accent);background:rgba(255,255,255,.08)}
-.nav-search input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;padding:.45rem .8rem;width:220px;caret-color:var(--accent)}
-.nav-search input::placeholder{color:var(--dim)}
-.nav-search button{background:none;border:none;color:var(--sub);padding:.45rem .7rem;cursor:none;font-size:.9rem;transition:color .3s}
-.nav-search button:hover{color:var(--accent)}
-.ai-badge{background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2px;padding:.3rem .8rem;border-radius:2px;animation:badgePulse 3s ease infinite}
-@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,.3)}50%{box-shadow:0 0 0 6px rgba(230,57,70,0)}}
+.nav-search-wrap{display:flex;align-items:center;background:rgba(255,255,255,.05);border:1px solid var(--b2);border-radius:3px;overflow:hidden;transition:all .3s}
+.nav-search-wrap:focus-within{border-color:rgba(230,57,70,.5);background:rgba(255,255,255,.07)}
+#nav-q{background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;padding:.42rem .8rem;width:200px;caret-color:var(--accent)}
+#nav-q::placeholder{color:var(--dim)}
+.nav-search-wrap button{background:none;border:none;color:var(--sub);padding:.4rem .7rem;cursor:none;font-size:.95rem;transition:color .3s}
+.nav-search-wrap button:hover{color:var(--accent)}
+.live-dot{background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:2px;padding:.3rem .75rem;border-radius:2px;display:flex;align-items:center;gap:.4rem}
+.live-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:livePulse 1.5s ease infinite}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
 
-/* Hero / Spotlight */
-#hero{position:relative;height:92vh;min-height:600px;display:flex;align-items:flex-end;padding:0 2.5rem 5rem;overflow:hidden}
-.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center top;transition:opacity 1s}
-.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 0%,rgba(6,6,8,.6) 50%,rgba(6,6,8,.2) 100%)}
-.hero-bg::before{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(6,6,8,.9) 40%,transparent 100%)}
-.hero-content{position:relative;z-index:2;max-width:600px}
-.hero-badge-row{display:flex;align-items:center;gap:.8rem;margin-bottom:1rem;flex-wrap:wrap}
-.hbadge{padding:.25rem .7rem;border-radius:2px;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:1.5px}
-.hbadge.trending{background:var(--accent);color:#fff}
-.hbadge.rating{background:rgba(244,162,97,.15);border:1px solid rgba(244,162,97,.4);color:var(--gold)}
-.hbadge.year{background:var(--b1);border:1px solid var(--b2);color:var(--sub)}
-.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,5.5rem);line-height:.95;letter-spacing:1px;margin-bottom:1rem;text-shadow:0 4px 20px rgba(0,0,0,.5)}
-.hero-meta{display:flex;align-items:center;gap:1.2rem;margin-bottom:1rem;flex-wrap:wrap}
-.hero-meta span{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--sub)}
-.hero-meta .rt{color:var(--gold)}
-.hero-overview{font-size:.95rem;line-height:1.7;color:rgba(240,236,250,.8);max-width:480px;margin-bottom:1.6rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.hero-btns{display:flex;gap:.8rem;flex-wrap:wrap}
-.hbtn{display:flex;align-items:center;gap:.6rem;padding:.75rem 1.6rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:1.5px;cursor:none;transition:all .3s;border:none;text-transform:uppercase}
-.hbtn.primary{background:var(--accent);color:#fff}
-.hbtn.primary:hover{background:#c1121f;transform:translateY(-2px)}
-.hbtn.secondary{background:rgba(255,255,255,.12);color:var(--text);border:1px solid var(--b2)}
-.hbtn.secondary:hover{background:rgba(255,255,255,.2);transform:translateY(-2px)}
-.hero-dots{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:3}
-.hdot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);cursor:none;transition:all .3s}
-.hdot.active{background:var(--accent);width:20px;border-radius:3px}
+/* HERO */
+#hero{position:relative;height:90vh;min-height:580px;display:flex;align-items:flex-end;padding:0 2.5rem 5rem;overflow:hidden;background:#080810}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 20%;transition:opacity 1.2s ease}
+.hero-grad{position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 0%,rgba(6,6,8,.5) 55%,rgba(6,6,8,.15) 100%)}
+.hero-grad2{position:absolute;inset:0;background:linear-gradient(to right,rgba(6,6,8,.88) 35%,transparent 75%)}
+.hero-content{position:relative;z-index:2;max-width:580px}
+.hero-chips{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+.hchip{padding:.22rem .65rem;border-radius:2px;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase}
+.hchip.red{background:var(--accent);color:#fff}
+.hchip.gold{background:rgba(244,162,97,.15);border:1px solid rgba(244,162,97,.4);color:var(--gold)}
+.hchip.dim{background:var(--b1);border:1px solid var(--b2);color:var(--sub)}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.6rem,5.5vw,5rem);line-height:.93;letter-spacing:1px;margin-bottom:.8rem;text-shadow:0 2px 20px rgba(0,0,0,.6)}
+.hero-meta{display:flex;align-items:center;gap:1rem;margin-bottom:.9rem;flex-wrap:wrap}
+.hero-meta span{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--sub)}
+.hero-meta .gld{color:var(--gold);font-weight:700}
+.hero-meta .grn{color:var(--green)}
+.hero-overview{font-size:.92rem;line-height:1.7;color:rgba(240,236,250,.75);max-width:460px;margin-bottom:1.5rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.hero-btns{display:flex;gap:.75rem;flex-wrap:wrap}
+.hbtn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:1.5px;cursor:none;border:none;transition:all .3s;text-transform:uppercase}
+.hbtn.p{background:var(--accent);color:#fff}
+.hbtn.p:hover{background:#c1121f;transform:translateY(-2px)}
+.hbtn.s{background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--b2)}
+.hbtn.s:hover{background:rgba(255,255,255,.18);transform:translateY(-2px)}
+.hero-progress{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.06)}
+.hero-progress-bar{height:100%;background:var(--accent);transition:width 7s linear;width:0}
+.hdots{position:absolute;bottom:1.5rem;right:2.5rem;display:flex;gap:.5rem;z-index:3}
+.hdot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);cursor:none;transition:all .3s}
+.hdot.active{background:var(--accent);width:18px;border-radius:3px}
 
-/* Search Hero Section */
-#search-section{position:relative;z-index:1;background:linear-gradient(to bottom,transparent,var(--bg) 30%);margin-top:-3rem;padding:2rem 2.5rem 1rem}
-.search-hero{max-width:800px;margin:0 auto}
-.search-label{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:.6rem}
-.search-label::before{content:'✦';animation:spin 4s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.search-wrap{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--b2);border-radius:4px;overflow:hidden;transition:all .3s}
-.search-wrap:focus-within{border-color:var(--accent);background:rgba(255,255,255,.06);box-shadow:0 0 40px rgba(230,57,70,.1)}
-#main-q{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:1.05rem;padding:1rem 1.2rem;caret-color:var(--accent)}
+/* SEARCH SECTION */
+#search-sec{position:relative;z-index:1;padding:2rem 2.5rem 1.2rem;background:linear-gradient(to bottom,transparent,var(--bg) 25%)}
+.search-lbl{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:3px;color:var(--accent);margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.search-lbl::before{content:'✦';display:inline-block;animation:spinSlow 6s linear infinite}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+.search-wrap{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--b2);border-radius:4px;overflow:hidden;max-width:780px;transition:all .3s}
+.search-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 40px rgba(230,57,70,.08)}
+#main-q{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:1rem;padding:.95rem 1.1rem;caret-color:var(--accent)}
 #main-q::placeholder{color:var(--dim)}
-#ai-btn{padding:.9rem 2rem;background:var(--accent);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:2px;cursor:none;transition:all .3s;white-space:nowrap;text-transform:uppercase}
+#ai-btn{padding:.9rem 1.8rem;background:var(--accent);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:2px;cursor:none;transition:all .3s;white-space:nowrap;text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
 #ai-btn:hover{background:#c1121f}
-#ai-btn:disabled{background:var(--dim);cursor:default}
-.quick-tags{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.9rem}
-.qt{padding:.3rem .85rem;border:1px solid var(--b1);border-radius:100px;font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim);cursor:none;transition:all .3s;letter-spacing:1px}
-.qt:hover{border-color:var(--accent);color:var(--text);background:rgba(230,57,70,.07)}
+#ai-btn:disabled{background:var(--dim)}
+.qtags{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.85rem}
+.qt{padding:.28rem .8rem;border:1px solid var(--b1);border-radius:100px;font-family:'Space Mono',monospace;font-size:.58rem;color:var(--dim);cursor:none;transition:all .3s;letter-spacing:.8px}
+.qt:hover{border-color:var(--accent);color:var(--text);background:rgba(230,57,70,.06)}
 
-/* AI Result Panel */
-#ai-panel{margin:0 2.5rem 1rem;display:none}
-#ai-panel.show{display:block}
-.aip-inner{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.5rem;position:relative;overflow:hidden}
-.aip-inner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--gold),var(--teal))}
-.aip-hd{display:flex;align-items:center;gap:.9rem;margin-bottom:1rem}
-.aip-orb{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;animation:orbGlow 2.5s ease infinite}
+/* AI PANEL */
+#aip{margin:0 2.5rem .5rem;display:none}
+#aip.show{display:block}
+.aip-box{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.4rem 1.6rem;position:relative;overflow:hidden}
+.aip-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--gold),var(--teal))}
+.aip-hd{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem}
+.aip-orb{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;animation:orbGlow 2.5s ease infinite}
 @keyframes orbGlow{0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,.4)}50%{box-shadow:0 0 0 10px rgba(230,57,70,0)}}
-.aip-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px}
-.aip-status{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--teal);letter-spacing:1.5px}
-.aip-text{font-size:.9rem;line-height:1.7;color:var(--sub)}
-.blink{display:inline-block;width:2px;height:.9em;background:var(--accent);vertical-align:middle;margin-left:2px;animation:blink 1s step-end infinite}
+.aip-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px}
+.aip-status{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--teal);letter-spacing:1.5px}
+.aip-txt-wrap{font-size:.88rem;line-height:1.7;color:var(--sub)}
+.blink{display:inline-block;width:2px;height:.88em;background:var(--accent);vertical-align:middle;margin-left:2px;animation:blink 1s step-end infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-/* Error */
-.err{background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);border-radius:6px;padding:1rem 1.4rem;color:var(--accent);font-family:'Space Mono',monospace;font-size:.75rem;margin:0 2.5rem 1rem;display:none;line-height:1.6}
+/* ERR */
+.err{background:rgba(230,57,70,.07);border:1px solid rgba(230,57,70,.22);border-radius:6px;padding:1rem 1.4rem;color:var(--accent);font-family:'Space Mono',monospace;font-size:.72rem;margin:0 2.5rem .8rem;display:none;line-height:1.6}
 .err.show{display:block}
 
-/* Section */
-section.row{padding:0 2.5rem;margin-bottom:3rem}
-.row-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
-.row-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px}
+/* ROWS */
+.row{padding:0 2.5rem;margin-bottom:2.5rem}
+.row-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem}
+.row-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px}
 .row-title span{color:var(--accent)}
-.row-more{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--dim);cursor:none;transition:color .3s;letter-spacing:1px;text-decoration:none;background:none;border:none}
-.row-more:hover{color:var(--accent)}
+.more-btn{background:none;border:none;font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim);cursor:none;letter-spacing:1px;transition:color .3s;text-transform:uppercase}
+.more-btn:hover{color:var(--accent)}
 
-/* Genre Tabs */
-.genre-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
-.gtab{padding:.4rem 1rem;border:1px solid var(--b1);border-radius:100px;font-family:'Space Mono',monospace;font-size:.62rem;color:var(--dim);cursor:none;transition:all .3s;letter-spacing:1px;background:none}
+/* Genre tabs */
+.gtabs{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.gtab{padding:.36rem .95rem;border:1px solid var(--b1);border-radius:100px;font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim);cursor:none;transition:all .3s;letter-spacing:.8px;background:none;text-transform:uppercase}
 .gtab:hover{border-color:var(--b3);color:var(--text)}
 .gtab.active{background:var(--accent);border-color:var(--accent);color:#fff}
 
-/* Movie Grid */
-.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
-.mc{position:relative;border-radius:6px;overflow:hidden;background:var(--s2);cursor:none;transform-style:preserve-3d;transition:transform .35s cubic-bezier(.23,1,.32,1),box-shadow .35s,z-index 0s;animation:fadeUp .5s ease backwards}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.mc:hover{transform:scale(1.05) translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.7),0 0 0 1px rgba(230,57,70,.5);z-index:10}
+/* Grid */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:1rem}
+.mc{position:relative;border-radius:6px;overflow:hidden;background:var(--s2);cursor:none;transform-style:preserve-3d;transition:transform .35s cubic-bezier(.23,1,.32,1),box-shadow .35s;animation:fadeUp .5s ease backwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.mc:hover{transform:scale(1.05) translateY(-5px);box-shadow:0 18px 45px rgba(0,0,0,.65),0 0 0 1px rgba(230,57,70,.4);z-index:10}
 
-.mc-img-wrap{position:relative;padding-top:150%;overflow:hidden;background:var(--s3)}
-.mc-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
-.mc:hover .mc-img{transform:scale(1.08)}
-.mc-img-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;color:var(--dim)}
-.mc-img-placeholder span{font-size:2.5rem;opacity:.3}
-.mc-img-placeholder p{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:1px;opacity:.4}
+.mc-poster{position:relative;padding-top:148%;overflow:hidden;background:var(--s3)}
+.mc-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s;display:block}
+.mc:hover .mc-poster img{transform:scale(1.07)}
+.mc-noposter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;color:var(--dim)}
+.mc-noposter span{font-size:2.2rem;opacity:.25}
+.mc-noposter p{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:1px;opacity:.35;text-align:center}
 
-.mc-match{position:absolute;top:.6rem;left:.6rem;background:var(--accent);color:#fff;font-family:'Space Mono',monospace;font-size:.6rem;padding:.2rem .5rem;border-radius:2px;letter-spacing:1px;z-index:2}
-.mc-rating{position:absolute;top:.6rem;right:.6rem;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);color:var(--gold);font-family:'Space Mono',monospace;font-size:.62rem;padding:.2rem .5rem;border-radius:2px;letter-spacing:1px;z-index:2}
+.mc-match{position:absolute;top:.55rem;left:.55rem;background:var(--accent);color:#fff;font-family:'Space Mono',monospace;font-size:.58rem;padding:.18rem .5rem;border-radius:2px;letter-spacing:.8px;z-index:2}
+.mc-score{position:absolute;top:.55rem;right:.55rem;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);color:var(--gold);font-family:'Space Mono',monospace;font-size:.6rem;padding:.18rem .5rem;border-radius:2px;letter-spacing:.5px;z-index:2}
 
-.mc-hover{position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(6,6,8,.97));padding:1rem .9rem .9rem;display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity .3s;z-index:3}
-.mc:hover .mc-hover{opacity:1}
-.mc-genre{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--accent);letter-spacing:1px;margin-bottom:.4rem;text-transform:uppercase}
-.mc-ht{font-size:.85rem;font-weight:500;margin-bottom:.2rem;line-height:1.2}
-.mc-why{font-size:.72rem;color:rgba(240,236,250,.7);line-height:1.4;margin-bottom:.7rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.mc-btns{display:flex;gap:.4rem}
-.mc-btn{flex:1;padding:.45rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:.58rem;cursor:none;transition:all .3s;border:1px solid var(--b2);background:rgba(255,255,255,.08);color:var(--text);letter-spacing:.5px}
-.mc-btn:hover,.mc-btn.p{background:var(--accent);border-color:var(--accent)}
+.mc-overlay{position:absolute;inset:0;background:linear-gradient(transparent 28%,rgba(6,6,8,.97));padding:.8rem;display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity .3s;z-index:3}
+.mc:hover .mc-overlay{opacity:1}
+.mc-og{font-family:'Space Mono',monospace;font-size:.55rem;color:var(--accent);letter-spacing:.8px;margin-bottom:.3rem;text-transform:uppercase}
+.mc-ot{font-size:.82rem;font-weight:500;margin-bottom:.2rem;line-height:1.2}
+.mc-ow{font-size:.7rem;color:rgba(240,236,250,.65);line-height:1.4;margin-bottom:.6rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mc-obs{display:flex;gap:.4rem}
+.mc-ob{flex:1;padding:.4rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:.56rem;cursor:none;transition:all .25s;border:1px solid var(--b2);background:rgba(255,255,255,.07);color:var(--text);letter-spacing:.5px}
+.mc-ob:hover,.mc-ob.p{background:var(--accent);border-color:var(--accent)}
 
-.mc-info{padding:.7rem .8rem}
-.mc-title{font-size:.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.2rem}
-.mc-sub{display:flex;justify-content:space-between;align-items:center}
-.mc-yr{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--dim)}
-.mc-rt{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--gold)}
+.mc-info{padding:.65rem .75rem}
+.mc-ti{font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.2rem}
+.mc-me{display:flex;justify-content:space-between;align-items:center}
+.mc-yr{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim)}
+.mc-rt{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--gold)}
+
+/* Hscroll */
+.hscroll{display:flex;gap:.9rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.hscroll .mc{flex:0 0 170px}
 
 /* Skeleton */
-.skel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
-.skel-card{border-radius:6px;overflow:hidden;background:var(--s2)}
-.skel-poster{padding-top:150%;background:linear-gradient(90deg,var(--s2) 25%,rgba(255,255,255,.04) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+.skel-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:1rem}
+.skel-c{border-radius:6px;overflow:hidden;background:var(--s2)}
+.skel-p{padding-top:148%;background:linear-gradient(90deg,var(--s2) 25%,rgba(255,255,255,.04) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skel-info{padding:.7rem .8rem}
-.skel-line{height:9px;border-radius:2px;margin-bottom:.5rem;background:linear-gradient(90deg,var(--s2) 25%,rgba(255,255,255,.04) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+.skel-i{padding:.65rem .75rem}
+.skel-l{height:8px;border-radius:2px;margin-bottom:.45rem;background:linear-gradient(90deg,var(--s2) 25%,rgba(255,255,255,.04) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
 
-/* Horizontal scroll row */
-.hscroll{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:none}
-.hscroll::-webkit-scrollbar{display:none}
-.hscroll .mc{flex:0 0 180px}
-
-/* Prefs */
-.prefs-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:2rem;margin:0 2.5rem 3rem}
-.prefs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.4rem}
-.pcard{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:1.3rem;transition:border-color .3s}
+/* PREFS */
+.prefs-sec{padding:0 2.5rem;margin-bottom:3rem}
+.prefs-box{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.8rem}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.2rem;margin-top:1.2rem}
+.pcard{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:1.2rem;transition:border-color .3s}
 .pcard:hover{border-color:var(--b2)}
-.plbl{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:1px;color:var(--sub);margin-bottom:.9rem}
+.plbl{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:1px;color:var(--sub);margin-bottom:.8rem}
 .plbl b{color:var(--accent)}
 input[type=range]{-webkit-appearance:none;width:100%;height:2px;background:var(--b1);border-radius:2px;outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:none;box-shadow:0 0 8px var(--r);transition:transform .2s}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:none;box-shadow:0 0 8px rgba(230,57,70,.4);transition:transform .2s}
 input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.5)}
 
-/* Modal */
-.overlay{position:fixed;inset:0;z-index:500;background:rgba(6,6,8,.92);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s;padding:1rem}
+/* MODAL */
+.overlay{position:fixed;inset:0;z-index:500;background:rgba(6,6,8,.93);backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:1rem}
 .overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--s1);border:1px solid rgba(255,255,255,.08);border-radius:10px;width:100%;max-width:900px;max-height:92vh;overflow-y:auto;transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(.23,1,.32,1)}
+.modal{background:var(--s1);border:1px solid rgba(255,255,255,.08);border-radius:10px;width:100%;max-width:860px;max-height:92vh;overflow-y:auto;transform:translateY(18px) scale(.97);transition:transform .35s cubic-bezier(.23,1,.32,1)}
 .overlay.open .modal{transform:none}
-.modal-hero{position:relative;height:320px;overflow:hidden;border-radius:10px 10px 0 0}
-.modal-backdrop{width:100%;height:100%;object-fit:cover;object-position:center 20%}
-.modal-backdrop-ph{width:100%;height:100%;background:linear-gradient(135deg,var(--s2),var(--s3))}
-.modal-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,var(--s1) 0%,rgba(12,12,20,.3) 100%)}
-.modal-hero-content{position:absolute;bottom:0;left:0;right:0;padding:1.5rem 2rem 1.2rem;display:flex;gap:1.5rem;align-items:flex-end}
-.modal-poster{width:100px;height:150px;object-fit:cover;border-radius:4px;border:2px solid rgba(255,255,255,.1);flex-shrink:0;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-.modal-poster-ph{width:100px;height:150px;background:var(--s3);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:2rem}
-.modal-title-wrap{}
-.modal-genre-tag{display:inline-block;padding:.2rem .6rem;background:rgba(230,57,70,.15);border:1px solid rgba(230,57,70,.3);border-radius:2px;font-family:'Space Mono',monospace;font-size:.58rem;color:var(--accent);letter-spacing:1px;margin-bottom:.5rem}
-.modal-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:2px;line-height:1;text-shadow:0 2px 10px rgba(0,0,0,.5)}
-.modal-meta-row{display:flex;align-items:center;gap:1rem;margin-top:.4rem;flex-wrap:wrap}
-.modal-meta-row span{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--sub)}
-.modal-meta-row .gold{color:var(--gold)}
-.modal-close{position:absolute;top:1rem;right:1rem;background:rgba(0,0,0,.5);border:1px solid var(--b2);color:var(--sub);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:none;font-size:1rem;transition:all .3s;z-index:2}
-.modal-close:hover{background:var(--accent);border-color:var(--accent);color:#fff}
-.modal-body{padding:1.5rem 2rem 2rem;display:grid;grid-template-columns:1fr 300px;gap:2rem}
-.modal-overview{color:rgba(240,236,250,.8);line-height:1.7;font-size:.92rem;margin-bottom:1.2rem}
-.modal-ai-box{background:rgba(46,196,182,.06);border:1px solid rgba(46,196,182,.2);border-radius:6px;padding:1rem;margin-bottom:1.2rem}
-.modal-ai-lbl{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--teal);letter-spacing:2px;margin-bottom:.5rem}
-.modal-ai-txt{font-size:.87rem;color:var(--sub);line-height:1.6}
-.modal-btns{display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:1.2rem}
-.mbtn{display:flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:1.5px;cursor:none;transition:all .3s;border:none;text-transform:uppercase}
-.mbtn.p{background:var(--accent);color:#fff}
-.mbtn.p:hover{background:#c1121f}
-.mbtn.s{background:var(--b1);color:var(--text);border:1px solid var(--b2)}
-.mbtn.s:hover{background:var(--b2)}
-.cast-row{display:flex;gap:.6rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:none}
-.cast-row::-webkit-scrollbar{display:none}
-.cast-chip{flex-shrink:0;text-align:center;width:70px}
-.cast-img{width:52px;height:52px;border-radius:50%;object-fit:cover;margin:0 auto .3rem;display:block;border:2px solid var(--b2)}
-.cast-img-ph{width:52px;height:52px;border-radius:50%;background:var(--s3);margin:0 auto .3rem;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:1.2rem;border:2px solid var(--b2)}
-.cast-name{font-size:.65rem;color:var(--sub);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.modal-sidebar{}
-.sidebar-block{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:1rem;margin-bottom:1rem}
-.sb-title{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:.8rem}
-.sb-row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--b1);font-size:.82rem}
-.sb-row:last-child{border:none;padding-bottom:0}
-.sb-row span:first-child{color:var(--sub)}
-.sb-row span:last-child{color:var(--text);font-weight:500;text-align:right;max-width:60%}
-.similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
-.sim-card{border-radius:4px;overflow:hidden;cursor:none;transition:transform .3s;position:relative}
-.sim-card:hover{transform:scale(1.05)}
-.sim-img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:var(--s3)}
-.sim-title{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(6,6,8,.95));padding:.5rem .4rem .3rem;font-size:.65rem;font-weight:500;line-height:1.2}
 
-/* Trailer modal */
-.trailer-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
-.trailer-overlay.open{opacity:1;pointer-events:all}
-.trailer-inner{position:relative;width:90vw;max-width:960px;aspect-ratio:16/9}
-.trailer-inner iframe{width:100%;height:100%;border:none;border-radius:6px}
-.trailer-close{position:absolute;top:-2.5rem;right:0;background:none;border:none;color:#fff;font-size:1.5rem;cursor:none;opacity:.7;transition:opacity .3s}
-.trailer-close:hover{opacity:1}
+.m-hero{position:relative;height:300px;overflow:hidden;border-radius:10px 10px 0 0;background:var(--s3);display:flex;align-items:center;justify-content:center}
+.m-backdrop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 15%}
+.m-bgrad{position:absolute;inset:0;background:linear-gradient(to top,var(--s1),rgba(12,12,20,.2) 70%)}
+.m-bgrad2{position:absolute;inset:0;background:linear-gradient(to right,rgba(12,12,20,.8),transparent 60%)}
+.m-top{position:absolute;bottom:0;left:0;right:0;padding:1.2rem 1.8rem;display:flex;gap:1.4rem;align-items:flex-end}
+.m-poster{width:90px;height:134px;object-fit:cover;border-radius:4px;border:2px solid rgba(255,255,255,.1);flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.m-poster-ph{width:90px;height:134px;background:var(--s3);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--dim)}
+.m-title-area{}
+.m-gtag{display:inline-block;padding:.18rem .6rem;background:rgba(230,57,70,.14);border:1px solid rgba(230,57,70,.3);border-radius:2px;font-family:'Space Mono',monospace;font-size:.56rem;color:var(--accent);letter-spacing:1px;margin-bottom:.45rem}
+.m-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px;line-height:.95;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.m-metas{display:flex;align-items:center;gap:.9rem;margin-top:.4rem;flex-wrap:wrap}
+.m-metas span{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--sub)}
+.m-metas .gld{color:var(--gold)}
+.m-close{position:absolute;top:.9rem;right:.9rem;background:rgba(0,0,0,.5);border:1px solid var(--b2);color:var(--sub);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:none;font-size:.9rem;transition:all .3s;z-index:5}
+.m-close:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.m-body{padding:1.4rem 1.8rem 1.8rem;display:grid;grid-template-columns:1fr 280px;gap:1.8rem}
+.m-overview{color:rgba(240,236,250,.78);line-height:1.7;font-size:.9rem;margin-bottom:1.1rem}
+.m-ai{background:rgba(46,196,182,.06);border:1px solid rgba(46,196,182,.2);border-radius:6px;padding:.9rem 1rem;margin-bottom:1.1rem}
+.m-ai-lbl{font-family:'Space Mono',monospace;font-size:.57rem;color:var(--teal);letter-spacing:2px;margin-bottom:.4rem}
+.m-ai-txt{font-size:.85rem;color:var(--sub);line-height:1.6}
+.m-btns{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.mb{display:inline-flex;align-items:center;gap:.45rem;padding:.65rem 1.2rem;border-radius:3px;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:1.2px;cursor:none;border:none;transition:all .3s;text-transform:uppercase}
+.mb.p{background:var(--accent);color:#fff}
+.mb.p:hover{background:#c1121f}
+.mb.s{background:var(--b1);color:var(--text);border:1px solid var(--b2)}
+.mb.s:hover{background:var(--b2)}
+.m-awards{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--gold);line-height:1.5;padding:.7rem;background:rgba(244,162,97,.06);border:1px solid rgba(244,162,97,.15);border-radius:4px;margin-bottom:1rem}
+
+.m-sidebar{}
+.sb{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:.9rem;margin-bottom:.9rem}
+.sb-t{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:.7rem}
+.sb-row{display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid var(--b1);font-size:.8rem}
+.sb-row:last-child{border:none;padding-bottom:0}
+.sb-row span:first-child{color:var(--sub);flex-shrink:0}
+.sb-row span:last-child{color:var(--text);text-align:right;max-width:60%;line-height:1.3}
+.genres-wrap{display:flex;gap:.4rem;flex-wrap:wrap}
+.g-pill{padding:.22rem .65rem;background:rgba(124,106,255,.1);border:1px solid rgba(124,106,255,.2);border-radius:100px;font-family:'Space Mono',monospace;font-size:.57rem;color:var(--violet);letter-spacing:.8px}
+.rating-bar{display:flex;align-items:center;gap:.6rem;margin-top:.3rem}
+.rbar{flex:1;height:4px;background:var(--b1);border-radius:2px;overflow:hidden}
+.rbar-fill{height:100%;background:linear-gradient(to right,var(--accent),var(--gold));border-radius:2px;transition:width 1s ease}
 
 /* Footer */
-footer{border-top:1px solid var(--b1);padding:2rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+footer{border-top:1px solid var(--b1);padding:1.8rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.8rem}
 .flogo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:4px;color:var(--dim)}
-.ftxt{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim);letter-spacing:1px}
+.ftxt{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--dim);letter-spacing:1px}
 
 /* Scrollbar */
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+::-webkit-scrollbar-thumb{background:rgba(230,57,70,.4);border-radius:2px}
 
 /* Responsive */
-@media(max-width:900px){.modal-body{grid-template-columns:1fr}.modal-sidebar{display:none}}
-@media(max-width:768px){
-  nav{padding:0 1.2rem}.nav-mid{display:none}.nav-search{display:none}
-  #hero{padding:0 1.2rem 4rem}
-  #search-section{padding:1.5rem 1.2rem 1rem}
-  section.row{padding:0 1.2rem}
-  .prefs-wrap{margin:0 1.2rem 2rem}
-  footer{padding:1.5rem 1.2rem;flex-direction:column;text-align:center}
+@media(max-width:860px){.m-body{grid-template-columns:1fr}.m-sidebar{display:none}}
+@media(max-width:700px){
+  nav{padding:0 1rem}
+  .nav-tabs{display:none}
+  .nav-search-wrap{display:none}
+  #hero{padding:0 1.2rem 3.5rem;height:80vh}
+  #search-sec,.row,.prefs-sec{padding-left:1.2rem;padding-right:1.2rem}
   .mgrid{grid-template-columns:repeat(2,1fr)}
-  .hscroll .mc{flex:0 0 150px}
+  .hscroll .mc{flex:0 0 148px}
+  footer{padding:1.2rem;flex-direction:column;text-align:center}
 }
 </style>
 </head>
@@ -260,589 +254,523 @@ footer{border-top:1px solid var(--b1);padding:2rem 2.5rem;display:flex;justify-c
 <!-- NAV -->
 <nav id="nav">
   <div class="logo">CINE<span style="-webkit-text-fill-color:white;color:white">AI</span></div>
-  <ul class="nav-mid">
-    <li><a href="#" class="active" onclick="showTab('trending',this)">Trending</a></li>
-    <li><a href="#" onclick="showTab('topRated',this)">Top Rated</a></li>
-    <li><a href="#" onclick="showTab('nowPlaying',this)">Now Playing</a></li>
-    <li><a href="#" onclick="showTab('upcoming',this)">Upcoming</a></li>
+  <ul class="nav-tabs">
+    <li><button class="active" onclick="switchTab('trending',this)">Trending</button></li>
+    <li><button onclick="switchTab('topRated',this)">Top Rated</button></li>
+    <li><button onclick="switchTab('classics',this)">Classics</button></li>
   </ul>
   <div class="nav-right">
-    <div class="nav-search">
-      <input type="text" id="nav-q" placeholder="Search movies…" oninput="navSearch(this.value)" autocomplete="off"/>
-      <button onclick="doNavSearch()">⌕</button>
+    <div class="nav-search-wrap">
+      <input type="text" id="nav-q" placeholder="Search movies…" autocomplete="off" onkeydown="if(event.key==='Enter')navSearch()"/>
+      <button onclick="navSearch()">⌕</button>
     </div>
-    <div class="ai-badge">✦ AI LIVE</div>
+    <div class="live-dot">AI LIVE</div>
   </div>
 </nav>
 
-<!-- HERO SPOTLIGHT -->
+<!-- HERO -->
 <section id="hero">
   <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-grad"></div>
+  <div class="hero-grad2"></div>
   <div class="hero-content" id="hero-content">
-    <div style="color:var(--sub);font-family:'Space Mono',monospace;font-size:.7rem">Loading spotlight…</div>
+    <div style="color:var(--dim);font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:2px">LOADING…</div>
   </div>
-  <div class="hero-dots" id="hero-dots"></div>
+  <div class="hero-progress"><div class="hero-progress-bar" id="hero-bar"></div></div>
+  <div class="hdots" id="hdots"></div>
 </section>
 
 <!-- SEARCH -->
-<section id="search-section">
-  <div class="search-hero">
-    <div class="search-label">✦ Ask AI Anything</div>
-    <div class="search-wrap">
-      <input type="text" id="main-q" placeholder="e.g. 'a film that will haunt me for days' or 'like Parasite but more hopeful'…" autocomplete="off"/>
-      <button id="ai-btn" onclick="doAISearch()">✦ AI RECOMMEND</button>
-    </div>
-    <div class="quick-tags">
-      <div class="qt" onclick="qs('mind-bending sci-fi like Inception')">Like Inception</div>
-      <div class="qt" onclick="qs('films that will make me cry')">Emotional</div>
-      <div class="qt" onclick="qs('dark psychological thriller')">Dark Thriller</div>
-      <div class="qt" onclick="qs('feel-good comedy to cheer me up')">Feel Good</div>
-      <div class="qt" onclick="qs('hidden gems most people havent seen')">Hidden Gems</div>
-      <div class="qt" onclick="qs('best non-english world cinema masterpieces')">World Cinema</div>
-      <div class="qt" onclick="qs('horror films that are actually scary not just jumpscare')">Real Horror</div>
-      <div class="qt" onclick="qs('perfect date night romantic films')">Date Night</div>
-    </div>
+<section id="search-sec">
+  <div class="search-lbl">AI RECOMMENDATION ENGINE</div>
+  <div class="search-wrap">
+    <input type="text" id="main-q" placeholder="'a film that haunts you for days' · 'like Parasite but hopeful' · 'best 90s thriller'…" autocomplete="off"/>
+    <button id="ai-btn" onclick="doAI()">✦ GET AI PICKS</button>
+  </div>
+  <div class="qtags">
+    <div class="qt" onclick="qs('mind-bending psychological thriller like Inception')">Like Inception</div>
+    <div class="qt" onclick="qs('films that will emotionally destroy me in the best way')">Emotional</div>
+    <div class="qt" onclick="qs('best horror films not just jump scares truly scary')">Real Horror</div>
+    <div class="qt" onclick="qs('feel good movies to watch on a bad day')">Feel Good</div>
+    <div class="qt" onclick="qs('hidden gems most people have not seen')">Hidden Gems</div>
+    <div class="qt" onclick="qs('best non english world cinema masterpieces')">World Cinema</div>
+    <div class="qt" onclick="qs('perfect romantic films for date night')">Date Night</div>
+    <div class="qt" onclick="qs('best movies of 2023 and 2024')">Best of 2024</div>
   </div>
 </section>
 
 <!-- AI PANEL -->
-<div id="ai-panel">
-  <div class="aip-inner">
+<div id="aip">
+  <div class="aip-box">
     <div class="aip-hd">
       <div class="aip-orb">✦</div>
       <div>
-        <div class="aip-title">CineAI Analysis</div>
-        <div class="aip-status" id="aip-status">● READY</div>
+        <div class="aip-name">CineAI Engine</div>
+        <div class="aip-status" id="aip-st">● READY</div>
       </div>
     </div>
-    <div class="aip-text" id="aip-text"><span id="aip-txt">AI recommendations will appear here.</span><span class="blink"></span></div>
+    <div class="aip-txt-wrap"><span id="aip-txt">Your AI recommendations will appear here.</span><span class="blink"></span></div>
   </div>
 </div>
 
 <!-- ERROR -->
 <div class="err" id="err"></div>
 
-<!-- MAIN MOVIE ROWS -->
-<main id="main-content">
-
-  <!-- Genre Tabs + Grid -->
-  <section class="row">
+<!-- MAIN -->
+<main>
+  <div class="row">
     <div class="row-hd">
-      <div class="row-title" id="grid-title">TRENDING <span>THIS WEEK</span></div>
-      <button class="row-more" id="grid-more">VIEW ALL →</button>
+      <div class="row-title" id="grid-title">TRENDING <span>NOW</span></div>
+      <button class="more-btn">ALL MOVIES →</button>
     </div>
-    <div class="genre-tabs" id="genre-tabs">
-      <button class="gtab active" onclick="filterGenre(this,'all')">All</button>
-      <button class="gtab" onclick="filterGenre(this,'28')">Action</button>
-      <button class="gtab" onclick="filterGenre(this,'12')">Adventure</button>
-      <button class="gtab" onclick="filterGenre(this,'35')">Comedy</button>
-      <button class="gtab" onclick="filterGenre(this,'80')">Crime</button>
-      <button class="gtab" onclick="filterGenre(this,'18')">Drama</button>
-      <button class="gtab" onclick="filterGenre(this,'27')">Horror</button>
-      <button class="gtab" onclick="filterGenre(this,'878')">Sci-Fi</button>
-      <button class="gtab" onclick="filterGenre(this,'53')">Thriller</button>
-      <button class="gtab" onclick="filterGenre(this,'10749')">Romance</button>
+    <div class="gtabs" id="gtabs">
+      <button class="gtab active" onclick="gFilter(this,'all')">All</button>
+      <button class="gtab" onclick="gFilter(this,'Action')">Action</button>
+      <button class="gtab" onclick="gFilter(this,'Drama')">Drama</button>
+      <button class="gtab" onclick="gFilter(this,'Comedy')">Comedy</button>
+      <button class="gtab" onclick="gFilter(this,'Thriller')">Thriller</button>
+      <button class="gtab" onclick="gFilter(this,'Horror')">Horror</button>
+      <button class="gtab" onclick="gFilter(this,'Romance')">Romance</button>
+      <button class="gtab" onclick="gFilter(this,'Sci-Fi')">Sci-Fi</button>
+      <button class="gtab" onclick="gFilter(this,'Crime')">Crime</button>
     </div>
     <div id="main-grid"></div>
-  </section>
-
-  <!-- Top Rated Row -->
-  <section class="row" id="top-row" style="display:none">
-    <div class="row-hd"><div class="row-title">TOP <span>RATED</span></div></div>
-    <div class="hscroll" id="top-grid"></div>
-  </section>
-
-  <!-- Now Playing Row -->
-  <section class="row" id="now-row" style="display:none">
-    <div class="row-hd"><div class="row-title">NOW <span>PLAYING</span></div></div>
-    <div class="hscroll" id="now-grid"></div>
-  </section>
-
-  <!-- Preferences -->
-  <div class="prefs-wrap">
-    <div class="row-hd" style="margin-bottom:1.5rem">
-      <div class="row-title">TUNE <span>YOUR TASTE</span></div>
-      <button class="row-more" onclick="doAISearch()">APPLY & SEARCH →</button>
-    </div>
-    <div class="prefs-grid">
-      <div class="pcard"><div class="plbl"><span>MOOD INTENSITY</span><b id="pv1">7</b></div><input type="range" min="1" max="10" value="7" oninput="pv('pv1',this.value)"></div>
-      <div class="pcard"><div class="plbl"><span>COMPLEXITY</span><b id="pv2">6</b></div><input type="range" min="1" max="10" value="6" oninput="pv('pv2',this.value)"></div>
-      <div class="pcard"><div class="plbl"><span>MAX RUNTIME</span><b id="pv3">150 min</b></div><input type="range" min="60" max="240" value="150" oninput="pv('pv3',this.value+' min')"></div>
-      <div class="pcard"><div class="plbl"><span>NON-ENGLISH</span><b id="pv4">50%</b></div><input type="range" min="0" max="100" value="50" oninput="pv('pv4',this.value+'%')"></div>
-      <div class="pcard"><div class="plbl"><span>OBSCURITY</span><b id="pv5">5</b></div><input type="range" min="1" max="10" value="5" oninput="pv('pv5',this.value)"></div>
-      <div class="pcard"><div class="plbl"><span>RELEASE ERA</span><b id="pv6">2000s+</b></div><input type="range" min="1" max="10" value="7" oninput="eraLbl(this.value)"></div>
-    </div>
   </div>
 
+  <div class="row" id="row2" style="display:none">
+    <div class="row-hd"><div class="row-title" id="row2-title">MORE <span>FOR YOU</span></div></div>
+    <div class="hscroll" id="hscroll-grid"></div>
+  </div>
+
+  <div class="prefs-sec">
+    <div class="prefs-box">
+      <div class="row-hd" style="margin-bottom:0">
+        <div class="row-title">TUNE <span>YOUR TASTE</span></div>
+        <button class="more-btn" onclick="doAI()">APPLY PREFS →</button>
+      </div>
+      <div class="pgrid">
+        <div class="pcard"><div class="plbl"><span>MOOD INTENSITY</span><b id="pv1">7</b></div><input type="range" min="1" max="10" value="7" oninput="pv('pv1',this.value)"></div>
+        <div class="pcard"><div class="plbl"><span>COMPLEXITY</span><b id="pv2">6</b></div><input type="range" min="1" max="10" value="6" oninput="pv('pv2',this.value)"></div>
+        <div class="pcard"><div class="plbl"><span>MAX RUNTIME</span><b id="pv3">150 min</b></div><input type="range" min="60" max="240" value="150" oninput="pv('pv3',this.value+' min')"></div>
+        <div class="pcard"><div class="plbl"><span>NON-ENGLISH</span><b id="pv4">50%</b></div><input type="range" min="0" max="100" value="50" oninput="pv('pv4',this.value+'%')"></div>
+        <div class="pcard"><div class="plbl"><span>OBSCURITY</span><b id="pv5">5</b></div><input type="range" min="1" max="10" value="5" oninput="pv('pv5',this.value)"></div>
+        <div class="pcard"><div class="plbl"><span>ERA</span><b id="pv6">2000s+</b></div><input type="range" min="1" max="10" value="7" oninput="eraLbl(this.value)"></div>
+      </div>
+    </div>
+  </div>
 </main>
 
-<!-- MOVIE MODAL -->
+<!-- MODAL -->
 <div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modal-inner">
-    <div class="modal-hero">
-      <div id="modal-backdrop-wrap"></div>
-      <div class="modal-hero-overlay"></div>
-      <div class="modal-hero-content">
-        <div id="modal-poster-wrap"></div>
-        <div class="modal-title-wrap">
-          <div class="modal-genre-tag" id="md-genre">Film</div>
-          <div class="modal-title" id="md-title">—</div>
-          <div class="modal-meta-row">
-            <span id="md-year">—</span>
-            <span>·</span>
-            <span id="md-runtime">—</span>
-            <span>·</span>
-            <span class="gold" id="md-rating">—</span>
-            <span>·</span>
+  <div class="modal">
+    <div class="m-hero" id="m-hero">
+      <div id="m-bd-wrap" style="position:absolute;inset:0"></div>
+      <div class="m-bgrad"></div><div class="m-bgrad2"></div>
+      <div class="m-top">
+        <div id="m-poster-wrap"></div>
+        <div class="m-title-area">
+          <div class="m-gtag" id="md-genre">Film</div>
+          <div class="m-title" id="md-title">—</div>
+          <div class="m-metas">
+            <span id="md-year">—</span><span>·</span>
+            <span id="md-runtime">—</span><span>·</span>
+            <span class="gld" id="md-rating">—</span><span>·</span>
             <span id="md-dir">—</span>
           </div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="m-close" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body">
+    <div class="m-body">
       <div>
-        <p class="modal-overview" id="md-overview"></p>
-        <div class="modal-ai-box" id="md-ai-wrap" style="display:none">
-          <div class="modal-ai-lbl">✦ AI INSIGHT</div>
-          <div class="modal-ai-txt" id="md-why"></div>
+        <p class="m-overview" id="md-plot"></p>
+        <div class="m-ai" id="md-ai" style="display:none">
+          <div class="m-ai-lbl">✦ AI INSIGHT</div>
+          <div class="m-ai-txt" id="md-why"></div>
         </div>
-        <div class="modal-btns">
-          <button class="mbtn p" id="trailer-btn" onclick="openTrailer()" style="display:none">▶ TRAILER</button>
-          <button class="mbtn s" onclick="closeModal()">+ WATCHLIST</button>
-          <button class="mbtn s" onclick="closeModal()">♥ LIKE</button>
-        </div>
-        <div id="cast-section" style="display:none">
-          <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim);letter-spacing:2px;margin-bottom:.8rem">CAST</div>
-          <div class="cast-row" id="cast-row"></div>
+        <div id="md-awards" class="m-awards" style="display:none"></div>
+        <div class="m-btns">
+          <button class="mb p" onclick="closeModal()">+ Watchlist</button>
+          <button class="mb s" onclick="closeModal()">♥ Like</button>
+          <button class="mb s" id="md-imdb-btn" onclick="">IMDb →</button>
         </div>
       </div>
-      <div class="modal-sidebar">
-        <div class="sidebar-block" id="sb-info"></div>
-        <div class="sidebar-block" id="sb-similar" style="display:none">
-          <div class="sb-title">Similar Films</div>
-          <div class="similar-grid" id="sim-grid"></div>
+      <div class="m-sidebar">
+        <div class="sb" id="sb-details"></div>
+        <div class="sb" id="sb-genres" style="display:none">
+          <div class="sb-t">Genres</div>
+          <div class="genres-wrap" id="md-genres"></div>
+        </div>
+        <div class="sb" id="sb-rating-bar" style="display:none">
+          <div class="sb-t">IMDb Score</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--gold);line-height:1" id="sb-score">—</div>
+          <div class="rating-bar"><div class="rbar"><div class="rbar-fill" id="sb-bar" style="width:0"></div></div><span style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim)" id="sb-votes">—</span></div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- TRAILER MODAL -->
-<div class="trailer-overlay" id="trailer-overlay" onclick="closeTrailer()">
-  <div class="trailer-inner">
-    <button class="trailer-close" onclick="closeTrailer()">✕</button>
-    <iframe id="trailer-frame" allowfullscreen allow="autoplay"></iframe>
   </div>
 </div>
 
 <footer>
   <div class="flogo">CINEAI</div>
-  <div class="ftxt">POWERED BY CLAUDE AI + TMDB</div>
-  <div class="ftxt">© 2025 CINEAI</div>
+  <div class="ftxt">POWERED BY CLAUDE AI + OMDB</div>
+  <div class="ftxt">© 2025 CINEAI — ALL RIGHTS RESERVED</div>
 </footer>
 
 <script>
-// ── Cursor ──
+// Cursor
 const c1=document.getElementById('cur'),c2=document.getElementById('cur2');
 document.addEventListener('mousemove',e=>{
   c1.style.left=e.clientX+'px';c1.style.top=e.clientY+'px';
   setTimeout(()=>{c2.style.left=e.clientX+'px';c2.style.top=e.clientY+'px'},80);
 });
-document.addEventListener('mousedown',()=>c1.style.transform='translate(-50%,-50%) scale(2)');
+document.addEventListener('mousedown',()=>c1.style.transform='translate(-50%,-50%) scale(2.2)');
 document.addEventListener('mouseup',()=>c1.style.transform='translate(-50%,-50%) scale(1)');
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('solid',scrollY>50));
 
-// ── Nav scroll ──
-window.addEventListener('scroll',()=>{
-  document.getElementById('nav').classList.toggle('solid',window.scrollY>60);
-});
-
-// ── Genre map ──
-const GENRES={28:'Action',12:'Adventure',16:'Animation',35:'Comedy',80:'Crime',99:'Documentary',18:'Drama',10751:'Family',14:'Fantasy',36:'History',27:'Horror',10402:'Music',9648:'Mystery',10749:'Romance',878:'Sci-Fi',10770:'TV Movie',53:'Thriller',10752:'War',37:'Western'};
-function genreNames(ids){return (ids||[]).slice(0,2).map(id=>GENRES[id]||'').filter(Boolean).join(' · ')||'Film'}
-
-// ── Prefs ──
+// Prefs
 function pv(id,v){document.getElementById(id).textContent=v}
 const eras=['Pre-1950','1950s','1960s','1970s','1980s','1990s','2000s+','2010s+','2020s','Latest'];
 function eraLbl(v){document.getElementById('pv6').textContent=eras[Math.min(Math.floor(v)-1,9)]}
 function getPrefs(){
-  const inputs=document.querySelectorAll('.prefs-grid input[type=range]');
-  return{intensity:inputs[0]?.value||7,complexity:inputs[1]?.value||6,runtime:inputs[2]?.value||150,language:inputs[3]?.value||50,obscurity:inputs[4]?.value||5};
+  const r=document.querySelectorAll('.pgrid input[type=range]');
+  return{intensity:r[0]?.value||7,complexity:r[1]?.value||6,runtime:r[2]?.value||150,language:r[3]?.value||50,obscurity:r[4]?.value||5};
 }
 
-// ── Typewriter ──
-let typeTimer=null;
+// Typewriter
+let tt=null;
 function typeText(el,txt,spd=20){
-  if(typeTimer)clearInterval(typeTimer);
-  el.textContent='';let i=0;
-  typeTimer=setInterval(()=>{el.textContent+=txt[i++];if(i>=txt.length)clearInterval(typeTimer)},spd);
+  if(tt)clearInterval(tt);el.textContent='';let i=0;
+  tt=setInterval(()=>{el.textContent+=txt[i++];if(i>=txt.length)clearInterval(tt)},spd);
 }
 
-// ── IMG helper ──
-const IMG=(path,size='w500')=>path?`https://image.tmdb.org/t/p/${size}${path}`:null;
-
-// ── Skeleton ──
-function skeleton(n=8){
-  return`<div class="skel-grid">${Array(n).fill(`<div class="skel-card"><div class="skel-poster"></div><div class="skel-info"><div class="skel-line" style="width:80%"></div><div class="skel-line" style="width:50%"></div></div></div>`).join('')}</div>`;
+// Poster — OMDb gives direct poster URL
+function getPoster(m){
+  if(m.Poster&&m.Poster!=='N/A')return m.Poster;
+  if(m.poster&&m.poster!=='N/A')return m.poster;
+  return null;
 }
 
-// ── Movie Card HTML ──
+// Skeleton
+function skel(n=8){return`<div class="skel-wrap">${Array(n).fill(`<div class="skel-c"><div class="skel-p"></div><div class="skel-i"><div class="skel-l" style="width:80%"></div><div class="skel-l" style="width:50%"></div></div></div>`).join('')}</div>`}
+
+// Card HTML
 function cardHTML(m,i,showMatch=false){
-  const poster=IMG(m.poster_path)||m.poster;
-  const year=m.release_date?.split('-')[0]||m.year||'';
-  const rating=parseFloat(m.vote_average||m.rating||0).toFixed(1);
-  const genre=genreNames(m.genre_ids);
-  const delay=(i*.06)+'s';
-  return`<div class="mc" style="animation-delay:${delay}" onclick="openModal(${m.id})">
-    <div class="mc-img-wrap">
+  const poster=getPoster(m);
+  const title=m.Title||m.title||'Unknown';
+  const year=m.Year||m.year||'';
+  const rating=m.imdbRating&&m.imdbRating!=='N/A'?m.imdbRating:(m.rating||'');
+  const genre=(m.Genre||'').split(',')[0].trim()||'Film';
+  const why=m.why||m.overview||'';
+  return`<div class="mc" style="animation-delay:${i*.06}s" onclick="openModal('${m.imdbID||m.id||''}',${JSON.stringify(m).replace(/'/g,"&#39;").replace(/"/g,'&quot;')})">
+    <div class="mc-poster">
       ${poster
-        ?`<img class="mc-img" src="${poster}" alt="${m.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-        :''
-      }
-      <div class="mc-img-placeholder" style="display:${poster?'none':'flex'}"><span>🎬</span><p>${genre||'Film'}</p></div>
+        ?`<img src="${poster}" alt="${title}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+        :''}
+      <div class="mc-noposter" style="display:${poster?'none':'flex'}"><span>🎬</span><p>${genre}</p></div>
       ${showMatch?`<div class="mc-match">${m.match}% MATCH</div>`:''}
-      ${rating>0?`<div class="mc-rating">★ ${rating}</div>`:''}
-      <div class="mc-hover">
-        <div class="mc-genre">${genre}</div>
-        <div class="mc-ht">${m.title}</div>
-        ${m.why?`<div class="mc-why">${m.why}</div>`:`<div class="mc-why">${(m.overview||'').substring(0,80)}…</div>`}
-        <div class="mc-btns">
-          <button class="mc-btn p" onclick="event.stopPropagation();openModal(${m.id})">Details</button>
-          <button class="mc-btn" onclick="event.stopPropagation()">+ List</button>
+      ${rating?`<div class="mc-score">★ ${rating}</div>`:''}
+      <div class="mc-overlay">
+        <div class="mc-og">${genre}</div>
+        <div class="mc-ot">${title}</div>
+        ${why?`<div class="mc-ow">${why.substring(0,90)}…</div>`:''}
+        <div class="mc-obs">
+          <button class="mc-ob p" onclick="event.stopPropagation();openModal('${m.imdbID||m.id||''}',${JSON.stringify(m).replace(/'/g,"&#39;").replace(/"/g,'&quot;')})">Details</button>
+          <button class="mc-ob" onclick="event.stopPropagation()">+ List</button>
         </div>
       </div>
     </div>
     <div class="mc-info">
-      <div class="mc-title">${m.title}</div>
-      <div class="mc-sub">
-        <span class="mc-yr">${year}${m.director?` · ${m.director.split(' ').pop()}`:''}${m.vote_count>0?` · ${(m.vote_count/1000).toFixed(0)}K votes`:''}</span>
-        ${rating>0?`<span class="mc-rt">★ ${rating}</span>`:''}
+      <div class="mc-ti">${title}</div>
+      <div class="mc-me">
+        <span class="mc-yr">${year}${m.Director&&m.Director!=='N/A'?' · '+m.Director.split(',')[0].split(' ').pop():''}</span>
+        ${rating?`<span class="mc-rt">★ ${rating}</span>`:''}
       </div>
     </div>
   </div>`;
 }
 
-// ── State ──
-let allData={trending:[],topRated:[],nowPlaying:[],upcoming:[]};
+// State
+let allData={trending:[],topRated:[],classics:[]};
 let currentMovies=[];
 let currentTab='trending';
 let heroMovies=[];
-let heroIndex=0;
+let heroIdx=0;
 let heroTimer=null;
-let currentTrailerKey=null;
 
-// ── Load homepage data ──
+// Load home
 async function loadHome(){
-  document.getElementById('main-grid').innerHTML=skeleton(8);
+  document.getElementById('main-grid').innerHTML=skel(8);
   try{
     const res=await fetch('/api/trending');
     allData=await res.json();
-    heroMovies=allData.trending.filter(m=>m.backdrop_path).slice(0,5);
-    setupHero();
-    currentMovies=allData.trending;
+    currentMovies=allData.trending||[];
     renderGrid(currentMovies);
-
-    // Side rows
-    if(allData.topRated.length){
-      document.getElementById('top-row').style.display='block';
-      document.getElementById('top-grid').innerHTML=allData.topRated.map((m,i)=>cardHTML(m,i)).join('');
-      addTilt('.top-grid .mc');
-    }
-    if(allData.nowPlaying.length){
-      document.getElementById('now-row').style.display='block';
-      document.getElementById('now-grid').innerHTML=allData.nowPlaying.map((m,i)=>cardHTML(m,i)).join('');
+    heroMovies=allData.trending.filter(m=>m.Poster&&m.Poster!=='N/A').slice(0,5);
+    setupHero();
+    // Second row
+    if(allData.topRated?.length){
+      document.getElementById('row2').style.display='block';
+      document.getElementById('row2-title').innerHTML='TOP <span>RATED</span>';
+      document.getElementById('hscroll-grid').innerHTML=allData.topRated.map((m,i)=>cardHTML(m,i)).join('');
     }
   }catch(e){
-    document.getElementById('main-grid').innerHTML=`<div style="color:var(--sub);font-family:'Space Mono',monospace;font-size:.8rem;padding:2rem">Could not load movies. Check TMDB_API_KEY.</div>`;
+    document.getElementById('main-grid').innerHTML=`<div style="color:var(--sub);font-family:'Space Mono',monospace;font-size:.8rem;padding:2rem;text-align:center">Could not load movies. Check server + ANTHROPIC_API_KEY.</div>`;
   }
 }
 
-// ── Hero Spotlight ──
+// Hero
 function setupHero(){
   if(!heroMovies.length)return;
-  renderHero(0);
-  const dotsEl=document.getElementById('hero-dots');
-  dotsEl.innerHTML=heroMovies.map((_,i)=>`<div class="hdot${i===0?' active':''}" onclick="setHero(${i})"></div>`).join('');
+  buildHero(0);
+  const dots=document.getElementById('hdots');
+  dots.innerHTML=heroMovies.map((_,i)=>`<div class="hdot${i===0?' active':''}" onclick="goHero(${i})"></div>`).join('');
+  startHeroTimer();
+}
+function startHeroTimer(){
   clearInterval(heroTimer);
-  heroTimer=setInterval(()=>setHero((heroIndex+1)%heroMovies.length),7000);
+  const bar=document.getElementById('hero-bar');
+  bar.style.transition='none';bar.style.width='0%';
+  setTimeout(()=>{bar.style.transition='width 7s linear';bar.style.width='100%'},50);
+  heroTimer=setInterval(()=>goHero((heroIdx+1)%heroMovies.length),7000);
 }
-
-function setHero(i){
-  heroIndex=i;
-  renderHero(i);
-  document.querySelectorAll('.hdot').forEach((d,j)=>d.classList.toggle('active',i===j));
+function goHero(i){
+  heroIdx=i;buildHero(i);
+  document.querySelectorAll('.hdot').forEach((d,j)=>d.classList.toggle('active',j===i));
+  startHeroTimer();
 }
-
-function renderHero(i){
+function buildHero(i){
   const m=heroMovies[i];
   if(!m)return;
   const bg=document.getElementById('hero-bg');
-  bg.style.backgroundImage=`url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
-  const rt=m.vote_average?.toFixed(1)||'';
-  const yr=m.release_date?.split('-')[0]||'';
-  const genre=genreNames(m.genre_ids);
+  // Use poster as background (OMDb doesn't have backdrops)
+  const img=getPoster(m)||'';
+  bg.style.backgroundImage=img?`url(${img})`:'none';
+  bg.style.filter='blur(2px) brightness(0.5)';
+  bg.style.transform='scale(1.05)';
+  const rt=m.imdbRating&&m.imdbRating!=='N/A'?m.imdbRating:'';
+  const yr=m.Year||'';
+  const genre=(m.Genre||'').split(',')[0].trim();
+  const imdbV=m.imdbVotes&&m.imdbVotes!=='N/A'?m.imdbVotes:'';
   document.getElementById('hero-content').innerHTML=`
-    <div class="hero-badge-row">
-      <div class="hbadge trending">✦ TRENDING</div>
-      ${rt?`<div class="hbadge rating">★ ${rt}</div>`:''}
-      ${yr?`<div class="hbadge year">${yr}</div>`:''}
-      ${genre?`<div class="hbadge year">${genre}</div>`:''}
+    <div class="hero-chips">
+      <div class="hchip red">✦ SPOTLIGHT</div>
+      ${rt?`<div class="hchip gold">★ ${rt} IMDb</div>`:''}
+      ${yr?`<div class="hchip dim">${yr}</div>`:''}
+      ${genre?`<div class="hchip dim">${genre}</div>`:''}
     </div>
-    <div class="hero-title">${m.title}</div>
+    <div class="hero-title">${m.Title}</div>
     <div class="hero-meta">
-      <span>${yr}</span>
-      ${rt?`<span class="rt">★ ${rt} / 10</span>`:''}
-      ${m.vote_count?`<span>${(m.vote_count/1000).toFixed(0)}K votes</span>`:''}
+      ${yr?`<span>${yr}</span>`:''}
+      ${m.Runtime&&m.Runtime!=='N/A'?`<span>${m.Runtime}</span>`:''}
+      ${rt?`<span class="gld">★ ${rt} / 10</span>`:''}
+      ${imdbV?`<span class="grn">${imdbV} votes</span>`:''}
     </div>
-    <p class="hero-overview">${m.overview||''}</p>
+    <p class="hero-overview">${m.Plot&&m.Plot!=='N/A'?m.Plot:''}</p>
     <div class="hero-btns">
-      <button class="hbtn primary" onclick="openModal(${m.id})">▶ View Details</button>
-      <button class="hbtn secondary" onclick="openModal(${m.id})">+ Watchlist</button>
+      <button class="hbtn p" onclick="openModal('${m.imdbID}',${JSON.stringify(m).replace(/"/g,'&quot;')})">▶ View Details</button>
+      <button class="hbtn s" onclick="openModal('${m.imdbID}',${JSON.stringify(m).replace(/"/g,'&quot;')})">+ Watchlist</button>
     </div>`;
 }
 
-// ── Render Grid ──
+// Render grid
 function renderGrid(movies,showMatch=false){
   const el=document.getElementById('main-grid');
-  if(!movies.length){el.innerHTML='<div style="color:var(--sub);font-family:Space Mono,monospace;font-size:.8rem;padding:2rem">No results found.</div>';return;}
+  if(!movies.length){el.innerHTML='<div style="color:var(--sub);font-family:Space Mono,monospace;font-size:.8rem;padding:2rem;text-align:center">No films found.</div>';return;}
   el.innerHTML=`<div class="mgrid">${movies.map((m,i)=>cardHTML(m,i,showMatch)).join('')}</div>`;
-  addTilt('#main-grid .mc');
 }
 
-// ── 3D Tilt ──
-function addTilt(sel){
-  document.querySelectorAll(sel).forEach(card=>{
-    card.addEventListener('mousemove',e=>{
-      const r=card.getBoundingClientRect();
-      const x=(e.clientX-r.left)/r.width-.5;
-      const y=(e.clientY-r.top)/r.height-.5;
-      card.style.transform=`scale(1.05) translateY(-6px) rotateY(${x*12}deg) rotateX(${-y*8}deg)`;
-    });
-    card.addEventListener('mouseleave',()=>card.style.transform='');
-  });
-}
-
-// ── Tab switch ──
-function showTab(tab,el){
-  document.querySelectorAll('.nav-mid a').forEach(a=>a.classList.remove('active'));
-  if(el)el.classList.add('active');
+// Tab switch
+function switchTab(tab,el){
+  document.querySelectorAll('.nav-tabs button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
   currentTab=tab;
-  const titles={trending:'TRENDING <span>THIS WEEK</span>',topRated:'TOP <span>RATED</span>',nowPlaying:'NOW <span>PLAYING</span>',upcoming:'COMING <span>SOON</span>'};
-  document.getElementById('grid-title').innerHTML=titles[tab]||tab;
-  document.getElementById('ai-panel').classList.remove('show');
+  const titles={trending:'TRENDING <span>NOW</span>',topRated:'TOP <span>RATED</span>',classics:'CLASSIC <span>PICKS</span>'};
+  document.getElementById('grid-title').innerHTML=titles[tab];
   currentMovies=allData[tab]||[];
   renderGrid(currentMovies);
+  document.getElementById('aip').classList.remove('show');
+  document.querySelectorAll('.gtab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('.gtab').classList.add('active');
 }
 
-// ── Genre filter ──
-async function filterGenre(el,gid){
+// Genre filter
+function gFilter(el,genre){
   document.querySelectorAll('.gtab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  if(gid==='all'){renderGrid(currentMovies);return;}
-  document.getElementById('main-grid').innerHTML=skeleton();
-  try{
-    const res=await fetch(`/api/genre/${gid}`);
-    const movies=await res.json();
-    renderGrid(movies);
-  }catch{renderGrid(currentMovies);}
+  if(genre==='all'){renderGrid(currentMovies);return;}
+  const filtered=currentMovies.filter(m=>(m.Genre||'').includes(genre));
+  renderGrid(filtered.length?filtered:currentMovies);
 }
 
-// ── Quick search ──
-function qs(txt){
-  document.getElementById('main-q').value=txt;
-  document.getElementById('main-q').scrollIntoView({behavior:'smooth',block:'center'});
-  setTimeout(doAISearch,300);
-}
-
-// ── Nav search ──
-let navTimer=null;
-function navSearch(q){
-  clearTimeout(navTimer);
-  if(!q.trim())return;
-  navTimer=setTimeout(()=>doNavSearchQuery(q),600);
-}
-async function doNavSearch(){doNavSearchQuery(document.getElementById('nav-q').value)}
-async function doNavSearchQuery(q){
-  if(!q.trim())return;
-  document.getElementById('main-grid').innerHTML=skeleton();
+// Nav search
+async function navSearch(){
+  const q=document.getElementById('nav-q').value.trim();
+  if(!q)return;
+  document.getElementById('main-grid').innerHTML=skel(8);
   document.getElementById('grid-title').innerHTML=`SEARCH <span>RESULTS</span>`;
+  document.getElementById('aip').classList.remove('show');
+  document.getElementById('err').classList.remove('show');
   try{
     const res=await fetch(`/api/search?q=${encodeURIComponent(q)}`);
     const movies=await res.json();
     currentMovies=movies;
     renderGrid(movies);
-    window.scrollTo({top:document.getElementById('main-content').offsetTop-80,behavior:'smooth'});
-  }catch(e){showErr(e.message);}
+    window.scrollTo({top:document.querySelector('main').offsetTop-70,behavior:'smooth'});
+  }catch(e){showErr('Search failed: '+e.message);}
 }
 
-// ── AI Search ──
-async function doAISearch(){
+// Quick search
+function qs(txt){
+  document.getElementById('main-q').value=txt;
+  document.getElementById('main-q').scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(doAI,400);
+}
+
+// AI
+async function doAI(){
   const q=document.getElementById('main-q').value.trim();
   if(!q){document.getElementById('main-q').focus();return;}
-
   const btn=document.getElementById('ai-btn');
   btn.disabled=true;btn.textContent='THINKING…';
   document.getElementById('err').classList.remove('show');
-  document.getElementById('ai-panel').classList.add('show');
-  document.getElementById('aip-status').textContent='● PROCESSING · NEURAL ENGINE ACTIVE';
-  typeText(document.getElementById('aip-txt'),`Analyzing "${q}"… cross-referencing 847K films with your taste profile…`);
-  document.getElementById('main-grid').innerHTML=skeleton();
-  document.getElementById('grid-title').innerHTML=`AI <span>RECOMMENDATIONS</span>`;
+  document.getElementById('aip').classList.add('show');
+  document.getElementById('aip-st').textContent='● PROCESSING · NEURAL ENGINE ACTIVE';
+  typeText(document.getElementById('aip-txt'),`Analyzing "${q}"… scanning thousands of films to find your perfect match…`);
+  document.getElementById('main-grid').innerHTML=skel(8);
+  document.getElementById('grid-title').innerHTML=`AI <span>PICKS FOR YOU</span>`;
   document.querySelectorAll('.gtab').forEach(t=>t.classList.remove('active'));
   document.querySelector('.gtab').classList.add('active');
-  window.scrollTo({top:document.getElementById('main-content').offsetTop-80,behavior:'smooth'});
+  window.scrollTo({top:document.querySelector('main').offsetTop-70,behavior:'smooth'});
 
   try{
-    const res=await fetch('/api/recommend',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query:q,preferences:getPrefs()})
-    });
+    const res=await fetch('/api/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,preferences:getPrefs()})});
     const data=await res.json();
     if(data.error)throw new Error(data.error);
-
     currentMovies=data.movies||[];
     renderGrid(currentMovies,true);
-    document.getElementById('aip-status').textContent='● COMPLETE · '+currentMovies.length+' FILMS FOUND';
-    typeText(document.getElementById('aip-txt'),data.insight||'Here are your personalized picks.');
+    document.getElementById('aip-st').textContent=`● COMPLETE · ${currentMovies.length} FILMS FOUND`;
+    typeText(document.getElementById('aip-txt'),data.insight||'Here are your personalized AI picks.');
   }catch(e){
-    showErr(e.message.includes('ANTHROPIC_API_KEY')||e.message.includes('TMDB')
-      ?'⚠ API key missing. Add ANTHROPIC_API_KEY and TMDB_API_KEY in Render → Environment Variables.'
-      :'Error: '+e.message);
-    document.getElementById('aip-status').textContent='● ERROR';
-    typeText(document.getElementById('aip-txt'),'Could not connect to AI engine.');
-    renderGrid(allData.trending||[]);
+    const msg=e.message.includes('ANTHROPIC_API_KEY')
+      ?'⚠ ANTHROPIC_API_KEY missing. Add it in Render → Environment Variables → Redeploy.'
+      :'Error: '+e.message;
+    showErr(msg);
+    document.getElementById('aip-st').textContent='● ERROR · CHECK API KEY';
+    typeText(document.getElementById('aip-txt'),'Could not connect to AI engine. Check your API key.');
+    renderGrid(currentMovies.length?currentMovies:allData.trending||[]);
   }finally{
-    btn.disabled=false;btn.textContent='✦ AI RECOMMEND';
+    btn.disabled=false;btn.textContent='✦ GET AI PICKS';
   }
 }
 
-function showErr(msg){
-  const el=document.getElementById('err');
-  el.textContent=msg;el.classList.add('show');
-}
+function showErr(msg){const e=document.getElementById('err');e.textContent=msg;e.classList.add('show')}
 
-// ── Movie Modal ──
-async function openModal(id){
+// Modal
+function openModal(imdbId, mData){
+  let m = typeof mData === 'string' ? JSON.parse(mData.replace(/&quot;/g,'"')) : mData;
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow='hidden';
-  currentTrailerKey=null;
-  document.getElementById('trailer-btn').style.display='none';
 
-  // Find local data first
-  const local=currentMovies.find(m=>m.id===id)||allData.trending?.find(m=>m.id===id);
-  if(local)populateModal(local,null,null,null);
+  // Populate with what we have
+  populateModal(m);
 
-  try{
-    const res=await fetch(`/api/movie/${id}`);
-    const m=await res.json();
-    if(m.error)return;
-    populateModal(m,m.cast,m.trailerKey,m.similar);
-
-    // AI why (if from recommendation)
-    const aiMovie=currentMovies.find(m=>m.id===id);
-    if(aiMovie?.why){
-      document.getElementById('md-ai-wrap').style.display='block';
-      document.getElementById('md-why').textContent=aiMovie.why;
-    }else{
-      document.getElementById('md-ai-wrap').style.display='none';
-    }
-  }catch(e){console.error(e);}
+  // Fetch full details
+  if(imdbId&&imdbId!=='undefined'){
+    fetch(`/api/movie/${imdbId}`).then(r=>r.json()).then(full=>{
+      if(full&&full.Title)populateModal({...full,match:m?.match,why:m?.why});
+    }).catch(()=>{});
+  }
 }
 
-function populateModal(m,cast,trailerKey,similar){
-  // Backdrop
-  const bw=document.getElementById('modal-backdrop-wrap');
-  if(m.backdrop_path){
-    bw.innerHTML=`<img class="modal-backdrop" src="${IMG(m.backdrop_path,'w1280')}" alt=""/>`;
-  }else{bw.innerHTML='<div class="modal-backdrop-ph"></div>';}
+function populateModal(m){
+  if(!m)return;
+  const poster=getPoster(m);
+  const title=m.Title||m.title||'Unknown';
+  const year=m.Year||m.year||'';
+  const runtime=m.Runtime&&m.Runtime!=='N/A'?m.Runtime:'—';
+  const rating=m.imdbRating&&m.imdbRating!=='N/A'?`★ ${m.imdbRating} / 10`:(m.rating?`★ ${m.rating}`:'—');
+  const dir=m.Director&&m.Director!=='N/A'?m.Director.split(',')[0]:(m.director||'—');
+  const genre=(m.Genre||'').split(',')[0].trim()||'Film';
+  const plot=m.Plot&&m.Plot!=='N/A'?m.Plot:(m.overview||'');
 
-  // Poster
-  const pw=document.getElementById('modal-poster-wrap');
-  if(m.poster_path||m.poster){
-    pw.innerHTML=`<img class="modal-poster" src="${m.poster_path?IMG(m.poster_path,'w342'):m.poster}" alt=""/>`;
-  }else{pw.innerHTML='<div class="modal-poster-ph">🎬</div>';}
+  // Backdrop = poster (OMDb)
+  document.getElementById('m-bd-wrap').innerHTML=poster
+    ?`<img class="m-backdrop" src="${poster}" alt="${title}" style="filter:blur(3px) brightness(.4);transform:scale(1.1)">`
+    :`<div style="position:absolute;inset:0;background:linear-gradient(135deg,var(--s2),var(--s3))"></div>`;
 
-  // Info
-  const genre=m.genres?m.genres.map(g=>g.name).join(' · '):genreNames(m.genre_ids);
-  document.getElementById('md-genre').textContent=genre||'Film';
-  document.getElementById('md-title').textContent=m.title||'—';
-  document.getElementById('md-year').textContent=m.release_date?.split('-')[0]||m.year||'—';
-  const rt=m.runtime?`${Math.floor(m.runtime/60)}h ${m.runtime%60}m`:(m.runtime_str||'—');
-  document.getElementById('md-runtime').textContent=rt;
-  document.getElementById('md-rating').textContent=m.vote_average?`★ ${parseFloat(m.vote_average).toFixed(1)} / 10`:(m.rating?`★ ${m.rating}`:'—');
-  document.getElementById('md-dir').textContent=m.director?`Dir. ${m.director}`:'';
-  document.getElementById('md-overview').textContent=m.overview||'';
+  document.getElementById('m-poster-wrap').innerHTML=poster
+    ?`<img class="m-poster" src="${poster}" alt="${title}">`
+    :`<div class="m-poster-ph">🎬</div>`;
 
-  // Trailer
-  if(trailerKey){
-    currentTrailerKey=trailerKey;
-    document.getElementById('trailer-btn').style.display='flex';
+  document.getElementById('md-genre').textContent=genre;
+  document.getElementById('md-title').textContent=title;
+  document.getElementById('md-year').textContent=year;
+  document.getElementById('md-runtime').textContent=runtime;
+  document.getElementById('md-rating').textContent=rating;
+  document.getElementById('md-dir').textContent=dir!=='N/A'?`Dir. ${dir}`:'';
+  document.getElementById('md-plot').textContent=plot;
+
+  // IMDb link
+  if(m.imdbID){
+    document.getElementById('md-imdb-btn').onclick=()=>window.open(`https://www.imdb.com/title/${m.imdbID}`,'_blank');
   }
 
-  // Cast
-  if(cast?.length){
-    document.getElementById('cast-section').style.display='block';
-    document.getElementById('cast-row').innerHTML=cast.map(p=>`
-      <div class="cast-chip">
-        ${p.profile_path
-          ?`<img class="cast-img" src="${IMG(p.profile_path,'w185')}" alt="${p.name}" loading="lazy">`
-          :`<div class="cast-img-ph">👤</div>`}
-        <div class="cast-name">${p.name}</div>
-      </div>`).join('');
-  }
+  // AI Why
+  if(m.why){
+    document.getElementById('md-ai').style.display='block';
+    document.getElementById('md-why').textContent=m.why;
+  }else{document.getElementById('md-ai').style.display='none';}
 
-  // Sidebar info
-  document.getElementById('sb-info').innerHTML=`
-    <div class="sb-title">Film Info</div>
-    ${m.runtime?`<div class="sb-row"><span>Runtime</span><span>${rt}</span></div>`:''}
-    ${m.vote_average?`<div class="sb-row"><span>Rating</span><span style="color:var(--gold)">★ ${parseFloat(m.vote_average).toFixed(1)}</span></div>`:''}
-    ${m.vote_count?`<div class="sb-row"><span>Votes</span><span>${m.vote_count.toLocaleString()}</span></div>`:''}
-    ${m.budget>0?`<div class="sb-row"><span>Budget</span><span>$${(m.budget/1e6).toFixed(0)}M</span></div>`:''}
-    ${m.revenue>0?`<div class="sb-row"><span>Revenue</span><span>$${(m.revenue/1e6).toFixed(0)}M</span></div>`:''}
-    ${m.original_language?`<div class="sb-row"><span>Language</span><span>${m.original_language.toUpperCase()}</span></div>`:''}
-    ${m.production_companies?.[0]?`<div class="sb-row"><span>Studio</span><span>${m.production_companies[0].name}</span></div>`:''}
+  // Awards
+  if(m.Awards&&m.Awards!=='N/A'){
+    document.getElementById('md-awards').style.display='block';
+    document.getElementById('md-awards').textContent='🏆 '+m.Awards;
+  }else{document.getElementById('md-awards').style.display='none';}
+
+  // Sidebar details
+  document.getElementById('sb-details').innerHTML=`
+    <div class="sb-t">Film Details</div>
+    ${year?`<div class="sb-row"><span>Year</span><span>${year}</span></div>`:''}
+    ${runtime!=='—'?`<div class="sb-row"><span>Runtime</span><span>${runtime}</span></div>`:''}
+    ${m.Language&&m.Language!=='N/A'?`<div class="sb-row"><span>Language</span><span>${m.Language.split(',')[0]}</span></div>`:''}
+    ${m.Country&&m.Country!=='N/A'?`<div class="sb-row"><span>Country</span><span>${m.Country.split(',')[0]}</span></div>`:''}
+    ${m.Writer&&m.Writer!=='N/A'?`<div class="sb-row"><span>Writer</span><span>${m.Writer.split(',')[0]}</span></div>`:''}
+    ${m.Actors&&m.Actors!=='N/A'?`<div class="sb-row"><span>Stars</span><span>${m.Actors.split(',').slice(0,2).join(', ')}</span></div>`:''}
+    ${m.BoxOffice&&m.BoxOffice!=='N/A'?`<div class="sb-row"><span>Box Office</span><span>${m.BoxOffice}</span></div>`:''}
+    ${m.match?`<div class="sb-row"><span>AI Match</span><span style="color:var(--accent);font-weight:700">${m.match}%</span></div>`:''}
   `;
 
-  // Similar
-  if(similar?.length){
-    const sb=document.getElementById('sb-similar');
-    sb.style.display='block';
-    document.getElementById('sim-grid').innerHTML=similar.slice(0,6).map(s=>`
-      <div class="sim-card" onclick="closeModal();setTimeout(()=>openModal(${s.id}),200)">
-        ${s.poster_path
-          ?`<img class="sim-img" src="${IMG(s.poster_path,'w185')}" alt="${s.title}" loading="lazy">`
-          :`<div class="sim-img" style="display:flex;align-items:center;justify-content:center;color:var(--dim)">🎬</div>`}
-        <div class="sim-title">${s.title}</div>
-      </div>`).join('');
+  // Genres
+  if(m.Genre&&m.Genre!=='N/A'){
+    document.getElementById('sb-genres').style.display='block';
+    document.getElementById('md-genres').innerHTML=m.Genre.split(',').map(g=>`<div class="g-pill">${g.trim()}</div>`).join('');
+  }
+
+  // Rating bar
+  if(m.imdbRating&&m.imdbRating!=='N/A'){
+    document.getElementById('sb-rating-bar').style.display='block';
+    document.getElementById('sb-score').textContent=m.imdbRating+' / 10';
+    document.getElementById('sb-votes').textContent=m.imdbVotes||'';
+    setTimeout(()=>{document.getElementById('sb-bar').style.width=(parseFloat(m.imdbRating)/10*100)+'%'},100);
   }
 }
 
 function closeModal(){
   document.getElementById('modal').classList.remove('open');
   document.body.style.overflow='';
-  closeTrailer();
 }
 
-// ── Trailer ──
-function openTrailer(){
-  if(!currentTrailerKey)return;
-  document.getElementById('trailer-frame').src=`https://www.youtube.com/embed/${currentTrailerKey}?autoplay=1`;
-  document.getElementById('trailer-overlay').classList.add('open');
-}
-function closeTrailer(){
-  document.getElementById('trailer-overlay').classList.remove('open');
-  document.getElementById('trailer-frame').src='';
-}
-
-// ── Keyboard ──
+// Keys
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal();closeTrailer();}
-  if(e.key==='Enter'&&document.activeElement===document.getElementById('main-q'))doAISearch();
-  if(e.key==='Enter'&&document.activeElement===document.getElementById('nav-q'))doNavSearch();
+  if(e.key==='Escape')closeModal();
+  if(e.key==='Enter'){
+    if(document.activeElement===document.getElementById('main-q'))doAI();
+    if(document.activeElement===document.getElementById('nav-q'))navSearch();
+  }
 });
 
-// ── Init ──
+// Init
 loadHome();
 </script>
 </body>
