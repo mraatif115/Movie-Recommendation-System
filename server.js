@@ -9,142 +9,165 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const OMDB_KEY = process.env.OMDB_API_KEY || 'trilogy';
+const TMDB_BASE = 'https://api.themoviedb.org/3';
+const TMDB_KEY = process.env.TMDB_API_KEY;
+const CLAUDE_KEY = process.env.ANTHROPIC_API_KEY;
 
-// ── OMDb helper ──
-async function omdb(params) {
-  const url = new URL('https://www.omdbapi.com/');
-  url.searchParams.set('apikey', OMDB_KEY);
+async function tmdb(endpoint, params = {}) {
+  const url = new URL(TMDB_BASE + endpoint);
+  url.searchParams.set('api_key', TMDB_KEY);
+  url.searchParams.set('language', 'en-US');
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   const res = await fetch(url.toString());
   return res.json();
 }
 
-async function searchMovie(title, year) {
-  try {
-    let data = await omdb({ t: title, y: year, type: 'movie', plot: 'short' });
-    if (data.Response === 'True') return data;
-    data = await omdb({ s: title, type: 'movie' });
-    if (data.Search?.length > 0) {
-      const detail = await omdb({ i: data.Search[0].imdbID, plot: 'short' });
-      return detail.Response === 'True' ? detail : null;
-    }
-    return null;
-  } catch { return null; }
-}
-
-// ── Trending homepage data ──
+// Trending + Top Rated + Now Playing
 app.get('/api/trending', async (req, res) => {
-  const trending = [
-    { t: 'Oppenheimer', y: '2023' }, { t: 'Dune Part Two', y: '2024' },
-    { t: 'Poor Things', y: '2023' }, { t: 'Past Lives', y: '2023' },
-    { t: 'Killers of the Flower Moon', y: '2023' }, { t: 'Saltburn', y: '2023' },
-    { t: 'The Holdovers', y: '2023' }, { t: 'Anatomy of a Fall', y: '2023' },
-    { t: 'Mission Impossible Dead Reckoning', y: '2023' }, { t: 'Wonka', y: '2023' },
-    { t: 'Napoleon', y: '2023' }, { t: 'Priscilla', y: '2023' },
-  ];
-  const topRated = [
-    { t: 'The Shawshank Redemption', y: '1994' }, { t: 'The Godfather', y: '1972' },
-    { t: 'The Dark Knight', y: '2008' }, { t: "Schindler's List", y: '1993' },
-    { t: 'Pulp Fiction', y: '1994' }, { t: 'Inception', y: '2010' },
-    { t: 'Fight Club', y: '1999' }, { t: 'Forrest Gump', y: '1994' },
-    { t: 'The Matrix', y: '1999' }, { t: 'Interstellar', y: '2014' },
-    { t: 'Parasite', y: '2019' }, { t: 'Whiplash', y: '2014' },
-  ];
-  const classics = [
-    { t: 'Blade Runner 2049', y: '2017' }, { t: 'Her', y: '2013' },
-    { t: 'No Country for Old Men', y: '2007' }, { t: 'Mad Max Fury Road', y: '2015' },
-    { t: 'Get Out', y: '2017' }, { t: 'Hereditary', y: '2018' },
-    { t: 'Midsommar', y: '2019' }, { t: 'Joker', y: '2019' },
-    { t: 'Once Upon a Time in Hollywood', y: '2019' }, { t: 'Marriage Story', y: '2019' },
-    { t: 'The Lighthouse', y: '2019' }, { t: 'Uncut Gems', y: '2019' },
-  ];
   try {
-    const [t, r, c] = await Promise.all([
-      Promise.all(trending.map(m => searchMovie(m.t, m.y))),
-      Promise.all(topRated.map(m => searchMovie(m.t, m.y))),
-      Promise.all(classics.map(m => searchMovie(m.t, m.y))),
+    const [trending, topRated, nowPlaying, upcoming] = await Promise.all([
+      tmdb('/trending/movie/week'),
+      tmdb('/movie/top_rated'),
+      tmdb('/movie/now_playing'),
+      tmdb('/movie/upcoming'),
     ]);
-    res.json({ trending: t.filter(Boolean), topRated: r.filter(Boolean), classics: c.filter(Boolean) });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    res.json({
+      trending: trending.results?.slice(0, 12) || [],
+      topRated: topRated.results?.slice(0, 12) || [],
+      nowPlaying: nowPlaying.results?.slice(0, 12) || [],
+      upcoming: upcoming.results?.slice(0, 12) || [],
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ── Movie details ──
+// Full movie details
 app.get('/api/movie/:id', async (req, res) => {
   try {
-    const data = await omdb({ i: req.params.id, plot: 'full' });
-    if (data.Response !== 'True') return res.status(404).json({ error: 'Not found' });
-    res.json(data);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const id = req.params.id;
+    const [details, credits, videos, similar, watchProviders] = await Promise.all([
+      tmdb(`/movie/${id}`),
+      tmdb(`/movie/${id}/credits`),
+      tmdb(`/movie/${id}/videos`),
+      tmdb(`/movie/${id}/similar`),
+      tmdb(`/movie/${id}/watch/providers`),
+    ]);
+    const trailer = videos.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube')
+      || videos.results?.find(v => v.site === 'YouTube');
+    const providers = watchProviders.results?.IN || watchProviders.results?.US || {};
+    res.json({
+      ...details,
+      cast: credits.cast?.slice(0, 10) || [],
+      director: credits.crew?.find(c => c.job === 'Director')?.name || 'N/A',
+      trailerKey: trailer?.key || null,
+      similar: similar.results?.slice(0, 8) || [],
+      streamingOn: providers.flatrate || providers.rent || [],
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ── Search ──
+// Search
 app.get('/api/search', async (req, res) => {
   try {
-    const data = await omdb({ s: req.query.q, type: 'movie' });
-    res.json(data.Search || []);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const data = await tmdb('/search/movie', { query: req.query.q, page: 1 });
+    res.json(data.results?.slice(0, 12) || []);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ── AI Recommendations — Gemini ──
+// Genre filter
+app.get('/api/genre/:id', async (req, res) => {
+  try {
+    const data = await tmdb('/discover/movie', {
+      with_genres: req.params.id,
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 500,
+    });
+    res.json(data.results?.slice(0, 12) || []);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// AI Recommendations — Claude picks titles, TMDB provides real data
 app.post('/api/recommend', async (req, res) => {
   const { query, preferences } = req.body;
-
-  if (!GEMINI_KEY) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY not configured. Add it in Render Environment Variables.' });
-  }
+  if (!CLAUDE_KEY) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured in environment.' });
+  if (!TMDB_KEY) return res.status(500).json({ error: 'TMDB_API_KEY not configured in environment.' });
 
   try {
-    const prompt = `You are CineAI, a world-class film recommendation AI.
-User query: "${query}"
-Preferences: intensity=${preferences?.intensity||7}/10, complexity=${preferences?.complexity||6}/10, runtime max=${preferences?.runtime||150}min, obscurity=${preferences?.obscurity||5}/10
-
-Respond ONLY with valid JSON. No markdown, no backticks, no extra text.
-Format:
+    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 1500,
+        system: `You are CineAI, a world-class film recommendation AI with encyclopedic cinema knowledge.
+Respond ONLY with valid JSON. No markdown, no backticks, no explanation text whatsoever.
+Required JSON format:
 {
-  "insight": "2 vivid sentences about what you understood and why your picks are perfect",
+  "insight": "2 vivid sentences explaining what you understood about the request and why your picks are perfect",
   "movies": [
-    { "title": "Exact English Title", "year": "2023", "imdbId": "tt1234567", "match": 95, "why": "One sharp sentence on why this fits." }
+    { "title": "Exact Official Title", "year": 2023, "match": 95, "why": "One precise sentence on why this film fits." }
   ]
 }
-Rules: Recommend exactly 8 movies. Use exact IMDb titles. Include correct IMDb ID. Match score 70-99.`;
+Rules:
+- Recommend exactly 8 movies
+- Use the EXACT official English title (for TMDB accuracy)
+- Match score 70-99 based on relevance
+- Be bold and specific — no generic picks`,
+        messages: [{
+          role: 'user',
+          content: `User query: "${query}"
+Preferences — Intensity: ${preferences?.intensity||7}/10 | Complexity: ${preferences?.complexity||6}/10 | Max runtime: ${preferences?.runtime||150}min | Non-English openness: ${preferences?.language||50}% | Obscurity: ${preferences?.obscurity||5}/10
+Return JSON only.`
+        }],
+      }),
+    });
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1500 },
-        }),
-      }
-    );
+    const cd = await claudeRes.json();
+    if (cd.error) throw new Error(cd.error.message);
+    const ai = JSON.parse(cd.content[0].text);
 
-    const geminiData = await geminiRes.json();
-
-    if (geminiData.error) throw new Error(geminiData.error.message);
-
-    let text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    // Clean markdown if present
-    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    const ai = JSON.parse(text);
-
-    // Fetch real OMDb data for each movie
-    const movies = await Promise.all(ai.movies.map(async (m) => {
+    // Fetch real TMDB data for each AI-recommended title
+    const results = await Promise.all(ai.movies.map(async (m) => {
       try {
-        let data;
-        if (m.imdbId) data = await omdb({ i: m.imdbId, plot: 'short' });
-        if (!data || data.Response !== 'True') data = await searchMovie(m.title, m.year);
-        if (!data || data.Response !== 'True') return null;
-        return { ...data, match: m.match, why: m.why };
+        const s = await tmdb('/search/movie', { query: m.title });
+        // Pick best match by year proximity
+        const found = s.results?.sort((a, b) => {
+          const ay = Math.abs((a.release_date?.split('-')[0] || 0) - m.year);
+          const by = Math.abs((b.release_date?.split('-')[0] || 0) - m.year);
+          return ay - by;
+        })[0];
+        if (!found) return null;
+        return {
+          id: found.id,
+          title: found.title,
+          year: found.release_date?.split('-')[0] || m.year,
+          rating: parseFloat(found.vote_average || 0).toFixed(1),
+          votes: found.vote_count || 0,
+          poster: found.poster_path ? `https://image.tmdb.org/t/p/w500${found.poster_path}` : null,
+          backdrop: found.backdrop_path ? `https://image.tmdb.org/t/p/w1280${found.backdrop_path}` : null,
+          overview: found.overview || '',
+          match: m.match,
+          why: m.why,
+          genre_ids: found.genre_ids || [],
+          popularity: found.popularity || 0,
+        };
       } catch { return null; }
     }));
 
-    res.json({ insight: ai.insight, movies: movies.filter(Boolean) });
+    res.json({ insight: ai.insight, movies: results.filter(Boolean) });
   } catch (e) {
-    console.error('Gemini Error:', e.message);
+    console.error('AI Error:', e.message);
     res.status(500).json({ error: e.message });
   }
 });
