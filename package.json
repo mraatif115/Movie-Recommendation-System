@@ -1,7 +1,7 @@
 {
   "name": "cineai",
   "version": "1.0.0",
-  "description": "AI-powered Movie Recommendation System",
+  "description": "AI Movie Recommendation System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
